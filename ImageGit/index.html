@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Uploading with Multer</title>
+
+<style>
+    input[type=file], select {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+button[type=submit] {
+    width: 100%;
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+
+div {
+    border-radius: 5px;
+    background-color: #f2f2f2;
+    padding: 20px;
+}
+  </style>
+</head>
+<body>
+
+<div>
+
+ <!--  SINGLE FILE -->
+<form action="/uploadfile" enctype="multipart/form-data" method="POST"> 
+   <input type="file" name="myFile" />
+   <input type="submit" value="Upload a file"/>
+</form>
+
+
+
+<hr>
+
+<!-- MULTIPLE FILES -->
+
+<form action="/uploadmultiple"  enctype="multipart/form-data" method="POST">
+  Select multiple images: <input type="file" name="myFiles" multiple>
+  <input type="submit" value="Upload your photos"/>
+</form>
+
+<hr>
+
+<!--   PHOTO-->
+
+<form action="/uploadphoto" enctype="multipart/form-data" method="POST"> 
+  <input type="file" name="picture" accept="image/*" />
+  <input type="submit" value="Upload an Image"/>
+</form>
+
+
+<img id="test" src="" alt="Red dot">
+
+</div>
+<script>
+
+ function addimagetag(response) {
+   response.forEach(function(img) {
+    var arrayBuffer = img.data.data;
+      var base64 = btoa(
+        new Uint8Array(arrayBuffer)
+          .reduce((data, byte) => data + String.fromCharCode(byte), '')
+      );
+      var img = document.createElement("img");
+      img.setAttribute('src', "data:image/jpg;base64," + base64);
+      document.body.appendChild(img);
+   });
+  
+ }
+ function initialize () {
+  
+  apiRequest('GET', `http://192.168.43.119:12365/photo`)
+  .then(function (response) {
+    addimagetag(response);
+      // var image = new Image();
+      // image.src = response[0].image;
+      // document.body.appendChild(image);
+      //let baseStr64="/9j/4AAQSkZJRgABAQE...";
+      //document.getElementById('test').setAttribute('src', "data:image/jpg;base64," + baseStr64);
+      // fillSurveyFilesDetails(response);       
+  }, function (error) {
+      // surveyDetailsTable.parentElement.innerHTML = error.statusText;
+  })
+  .catch(function (error) {
+      // surveyDetailsTable.parentElement.innerHTML = error;
+  });
+}
+
+function apiRequest(method, url) {
+  return new Promise(function (resolve, reject) {
+      let api = new XMLHttpRequest();
+      api.open(method, url);
+      api.onload = function() {
+          if (this.status >= 200 && this.status < 300) {
+              resolve(JSON.parse(api.response));
+          } else {
+              reject({
+                  status: this.status,
+                  statusText: api.statusText
+              });
+          }
+      };
+      api.send();
+  });
+}
+initialize();
+</script>
+
+
+</body>
+</html>
+
+
+
